@@ -27,55 +27,66 @@ window.playSound = function (id, loop, offset) {
   return createjs.Sound.play(id, { interrupt: createjs.Sound.INTERRUPT_EARLY, loop: loop, offset: offset });
 };
 
-window.addEventListener('load', function () {
+/* ============================================================
+   IMPORTANTE: todo lo de aqui abajo (variables canvas/stage/etc.
+   y las funciones init, handleFileLoad y handleComplete de cada
+   region) vive a nivel GLOBAL (fuera de cualquier funcion), a
+   proposito: las
+   composiciones de Adobe Animate (mapa_js.js, apan_es_js.js, etc.)
+   ya vienen compiladas esperando encontrar "stage", "stageApan",
+   etc. como variables globales de verdad (via window). Si esto se
+   mete dentro de otra función/closure, esas variables dejan de ser
+   visibles para el codigo de Animate y truena con
+   "ReferenceError: stage is not defined".
+   ============================================================ */
 
-  /* ================= MAPA PRINCIPAL ================= */
-  var canvas, stage, exportRoot, anim_container, dom_overlay_container, fnStartAnimation;
+/* ================= MAPA PRINCIPAL ================= */
+var canvas, stage, exportRoot, anim_container, dom_overlay_container, fnStartAnimation;
 
-  function construirMapa(host) {
-    host.innerHTML = '<div id="animation_container" style="background-color:rgba(0,0,102,00);">' +
-      '<canvas id="canvas" width="1280" height="800" style="position:absolute; display:block; background-color:rgba(0,0,102,00);"></canvas>' +
-      '<div id="dom_overlay_container" style="pointer-events:none; overflow:hidden; width:1280px; height:800px; position:absolute; left:0px; top:0px; display:block;"></div>' +
-      '</div>';
-  }
+function construirMapa(host) {
+  host.innerHTML = '<div id="animation_container" style="background-color:rgba(0,0,102,00);">' +
+    '<canvas id="canvas" width="1280" height="800" style="position:absolute; display:block; background-color:rgba(0,0,102,00);"></canvas>' +
+    '<div id="dom_overlay_container" style="pointer-events:none; overflow:hidden; width:1280px; height:800px; position:absolute; left:0px; top:0px; display:block;"></div>' +
+    '</div>';
+}
 
-  function init() {
-    canvas = document.getElementById("canvas");
-    anim_container = document.getElementById("animation_container");
-    dom_overlay_container = document.getElementById("dom_overlay_container");
-    var comp = AdobeAn.getComposition("41AF9C09B82E8C41B8C794079C09B682");
-    var lib = comp.getLibrary();
-    var loader = new createjs.LoadQueue(false);
-    loader.addEventListener("fileload", function (evt) { handleFileLoad(evt, comp) });
-    loader.addEventListener("complete", function (evt) { handleComplete(evt, comp) });
-    loader.loadManifest(lib.properties.manifest);
+function init() {
+  canvas = document.getElementById("canvas");
+  anim_container = document.getElementById("animation_container");
+  dom_overlay_container = document.getElementById("dom_overlay_container");
+  var comp = AdobeAn.getComposition("41AF9C09B82E8C41B8C794079C09B682");
+  var lib = comp.getLibrary();
+  var loader = new createjs.LoadQueue(false);
+  loader.addEventListener("fileload", function (evt) { handleFileLoad(evt, comp) });
+  loader.addEventListener("complete", function (evt) { handleComplete(evt, comp) });
+  loader.loadManifest(lib.properties.manifest);
+}
+function handleFileLoad(evt, comp) {
+  var images = comp.getImages();
+  if (evt && (evt.item.type == "image")) { images[evt.item.id] = evt.result; }
+}
+function handleComplete(evt, comp) {
+  var lib = comp.getLibrary();
+  var ss = comp.getSpriteSheet();
+  var queue = evt.target;
+  var ssMetadata = lib.ssMetadata;
+  for (var i = 0; i < ssMetadata.length; i++) {
+    ss[ssMetadata[i].name] = new createjs.SpriteSheet({ "images": [queue.getResult(ssMetadata[i].name)], "frames": ssMetadata[i].frames })
   }
-  function handleFileLoad(evt, comp) {
-    var images = comp.getImages();
-    if (evt && (evt.item.type == "image")) { images[evt.item.id] = evt.result; }
-  }
-  function handleComplete(evt, comp) {
-    var lib = comp.getLibrary();
-    var ss = comp.getSpriteSheet();
-    var queue = evt.target;
-    var ssMetadata = lib.ssMetadata;
-    for (var i = 0; i < ssMetadata.length; i++) {
-      ss[ssMetadata[i].name] = new createjs.SpriteSheet({ "images": [queue.getResult(ssMetadata[i].name)], "frames": ssMetadata[i].frames })
-    }
-    exportRoot = new lib.mapa();
-    stage = new lib.Stage(canvas);
-    stage.enableMouseOver();
-    fnStartAnimation = function () {
-      stage.addChild(exportRoot);
-      createjs.Ticker.framerate = lib.properties.fps;
-      createjs.Ticker.addEventListener("tick", stage);
-    };
-    AdobeAn.makeResponsive(true, 'both', false, 1, [canvas, anim_container, dom_overlay_container]);
-    AdobeAn.compositionLoaded(lib.properties.id);
-    fnStartAnimation();
-  }
+  exportRoot = new lib.mapa();
+  stage = new lib.Stage(canvas);
+  stage.enableMouseOver();
+  fnStartAnimation = function () {
+    stage.addChild(exportRoot);
+    createjs.Ticker.framerate = lib.properties.fps;
+    createjs.Ticker.addEventListener("tick", stage);
+  };
+  AdobeAn.makeResponsive(true, 'both', false, 1, [canvas, anim_container, dom_overlay_container]);
+  AdobeAn.compositionLoaded(lib.properties.id);
+  fnStartAnimation();
+}
 
-  /* ================= APAN (ES) ================= */
+/* ================= APAN (ES) ================= */
 
 	var canvasApan, stageApan, exportRootApan, anim_containerApan, dom_overlay_containerApan, fnStartAnimationApan;
 	function initApan() {
@@ -136,7 +147,7 @@ window.addEventListener('load', function () {
 	}
 	
 
-  /* ================= CALERA (ES) ================= */
+/* ================= CALERA (ES) ================= */
 
 	var canvasCalera, stageCalera, exportRootCalera, anim_containerRootCalera, dom_overlay_containerCalera, fnStartAnimationCalera;
 	function initCalera() {
@@ -197,7 +208,7 @@ window.addEventListener('load', function () {
 	}
 
 
-  /* ================= CDMX (ES) ================= */
+/* ================= CDMX (ES) ================= */
 
 var canvasCDMX, stageCDMX, exportRootCDMX, anim_containerCDMX, dom_overlay_containerCDMX, fnStartAnimationCDMX;
 function initCDMX() {
@@ -258,7 +269,7 @@ function handleCompleteCDMX(evt,comp) {
 }
 
 
-  /* ================= APAN (EN) ================= */
+/* ================= APAN (EN) ================= */
 
 	var canvasApanEn, stageApanEn, exportRootApanEn, anim_containerApanEn, dom_overlay_containerApanEn, fnStartAnimationApanEn;
 	function initApanEn() {
@@ -318,7 +329,7 @@ function handleCompleteCDMX(evt,comp) {
 	}
 	
 
-  /* ================= CALERA (EN) ================= */
+/* ================= CALERA (EN) ================= */
 
 	var canvasCaleraEn, stageCaleraEn, exportRootCaleraEn, anim_containerRootCaleraEn, dom_overlay_containerCaleraEn, fnStartAnimationCaleraEn;
 	function initCaleraEn() {
@@ -377,6 +388,8 @@ function handleCompleteCDMX(evt,comp) {
 		fnStartAnimationCaleraEn();
 	}
 
+
+window.addEventListener('load', function () {
 
   /* ================= LIGHTBOX / MODAL ================= */
   function hideTarget(selector) {
