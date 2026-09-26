@@ -410,7 +410,7 @@
     fps: 24,
     color: "#000066",
     opacity: 1.0,
-    manifest: [{ src: "https://static.wixstatic.com/media/b449d2_244747a8ee8c4054b672154330db4dcf~mv2.png", id: "mapa_atlas_1" }],
+    manifest: [{ src: "https://static.wixstatic.com/media/b449d2_b7d39e16448d442590f9d72525921961~mv2.png", id: "mapa_atlas_1" }],
     preloads: [],
   };
 
