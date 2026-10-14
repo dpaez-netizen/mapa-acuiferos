@@ -2186,7 +2186,7 @@ if (reversed == null) { reversed = false; }
 		this.button_2.addEventListener("click", fl_ClickToGoToWebPage_2);
 
 		function fl_ClickToGoToWebPage_2() {
-			window.open("/en/apan", "_blank");
+			window.irAAcuifero('apan');
 		}
 	}
 
