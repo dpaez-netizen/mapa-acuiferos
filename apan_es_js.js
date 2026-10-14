@@ -2640,7 +2640,7 @@
 			this.button_2.addEventListener("click", fl_ClickToGoToWebPage_2);
 			
 			function fl_ClickToGoToWebPage_2() {
-				window.open("/es/apan", "_self");
+				window.irAAcuifero('apan');
 			}
 		}
 	
