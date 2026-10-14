@@ -47,8 +47,8 @@ if (window.createjs && createjs.DisplayObject) {
 // Produccion (www.aguasfirmes.mx): rutas reales. CONFIRMAR las marcadas con (?).
 window.RUTAS_ACUIFEROS = {
   dev: {
-    es: { calera: '/aguasfirmes', apan: '/aguasfirmes', cdmx: '/aguasfirmes' },
-    en: { calera: '/aguasfirmes', apan: '/aguasfirmes', cdmx: '/aguasfirmes' }
+    es: { calera: '/aguasfirmes/calera', apan: '/aguasfirmes/apan', cdmx: '/aguasfirmes/cdmx' },
+    en: { calera: '/aguasfirmes/en/calera', apan: '/aguasfirmes/en/apan', cdmx: '/aguasfirmes/en/cdmx' }
   },
   prod: {
     es: { calera: '/calera',    apan: '/apan',    cdmx: '/cdmx' },      // (?)
