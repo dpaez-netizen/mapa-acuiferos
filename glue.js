@@ -28,18 +28,37 @@ window.playSound = function (id, loop, offset) {
 };
 
 /* ============================================================
+   Las imagenes de las animaciones vienen de otro dominio (static.wixstatic.com),
+   asi que el canvas queda "tainted" y createjs lanza un error al probar clics /
+   mouse sobre bitmaps (getImageData). Con esta bandera ese error se ignora y los
+   eventos del mouse siguen funcionando.
+   ============================================================ */
+if (window.createjs && createjs.DisplayObject) {
+  createjs.DisplayObject.suppressCrossDomainErrors = true;
+}
+
+/* ============================================================
    RUTAS de los botones "Conoce mas" de las animaciones.
    Se usan desde los archivos de Animate asi:
      window.irAAcuifero('calera');   // 'apan' | 'cdmx'
    Ajusta aqui las URLs reales del sitio (un solo lugar).
    ============================================================ */
+// Desarrollo (wixstudio.com / wixsite.com / editor): todo apunta a /aguasfirmes.
+// Produccion (www.aguasfirmes.mx): rutas reales. CONFIRMAR las marcadas con (?).
 window.RUTAS_ACUIFEROS = {
-  es: { calera: '/calera',    apan: '/apan',    cdmx: '/cdmx' },
-  en: { calera: '/en/calera', apan: '/en/apan', cdmx: '/cdmx' }
+  dev: {
+    es: { calera: '/aguasfirmes', apan: '/aguasfirmes', cdmx: '/aguasfirmes' },
+    en: { calera: '/aguasfirmes', apan: '/aguasfirmes', cdmx: '/aguasfirmes' }
+  },
+  prod: {
+    es: { calera: '/calera',    apan: '/apan',    cdmx: '/cdmx' },      // (?)
+    en: { calera: '/en/calera', apan: '/en/apan', cdmx: '/cdmx' }       // (?)
+  }
 };
 window.irAAcuifero = function (slug) {
   var lang = (document.documentElement.lang || 'es').toLowerCase().indexOf('en') === 0 ? 'en' : 'es';
-  var rutas = window.RUTAS_ACUIFEROS;
+  var esDev = /wixstudio\.com|wixsite\.com|editor\.wix\.com/i.test(location.hostname);
+  var rutas = window.RUTAS_ACUIFEROS[esDev ? 'dev' : 'prod'];
   var ruta = (rutas[lang] && rutas[lang][slug]) || rutas.es[slug];
   if (!ruta) return;
   if (typeof window.resetCanvases === 'function') window.resetCanvases();
@@ -75,7 +94,7 @@ function init() {
   dom_overlay_container = document.getElementById("dom_overlay_container");
   var comp = AdobeAn.getComposition("41AF9C09B82E8C41B8C794079C09B682");
   var lib = comp.getLibrary();
-  var loader = new createjs.LoadQueue(false);
+  var loader = new createjs.LoadQueue(false, '', true);
   loader.addEventListener("fileload", function (evt) { handleFileLoad(evt, comp) });
   loader.addEventListener("complete", function (evt) { handleComplete(evt, comp) });
   loader.loadManifest(lib.properties.manifest);
@@ -126,7 +145,7 @@ function handleComplete(evt, comp) {
 		dom_overlay_containerApan = document.getElementById("dom_overlay_containerApan");
 		var comp = AdobeAnApan.getComposition("ADB731659DD5194895D90CE1B0911A0BAPAN");
 		var lib = comp.getLibrary();
-		var loader = new createjs.LoadQueue(false);
+		var loader = new createjs.LoadQueue(false, '', true);
 		loader.installPlugin(createjs.Sound);
 		loader.addEventListener("fileload", function (evt) { handleFileLoadApan(evt, comp) });
 		loader.addEventListener("complete", function (evt) { handleCompleteApan(evt, comp) });
@@ -187,7 +206,7 @@ function handleComplete(evt, comp) {
 		dom_overlay_containerCalera = document.getElementById("dom_overlay_containerCalera");
 		var comp = AdobeAnCalera.getComposition("ADB731659DD5194895D90CE1B0911A0B");
 		var lib = comp.getLibrary();
-		var loader = new createjs.LoadQueue(false);
+		var loader = new createjs.LoadQueue(false, '', true);
 		loader.installPlugin(createjs.Sound);
 		loader.addEventListener("fileload", function (evt) { handleFileLoadCalera(evt, comp) });
 		loader.addEventListener("complete", function (evt) { handleCompleteCalera(evt, comp) });
@@ -248,7 +267,7 @@ function initCDMX() {
 	dom_overlay_containerCDMX = document.getElementById("dom_overlay_containerCDMX");
 	var comp=AdobeAnCDMX.getComposition("ADB731659DD5194895D90CE1B0911A0BCDMX");
 	var lib=comp.getLibrary();
-	var loader = new createjs.LoadQueue(false);
+	var loader = new createjs.LoadQueue(false, '', true);
 	loader.installPlugin(createjs.Sound);
 	loader.addEventListener("fileload", function(evt){handleFileLoadCDMX(evt,comp)});
 	loader.addEventListener("complete", function(evt){handleCompleteCDMX(evt,comp)});
@@ -309,7 +328,7 @@ function handleCompleteCDMX(evt,comp) {
 		dom_overlay_containerApanEn = document.getElementById("dom_overlay_containerApanEn");
 		var comp = AdobeAnApanEn.getComposition("ADB731659DD5194895D90CE1B0911A0BAPANEN");
 		var lib = comp.getLibrary();
-		var loader = new createjs.LoadQueue(false);
+		var loader = new createjs.LoadQueue(false, '', true);
 		loader.installPlugin(createjs.Sound);
 		loader.addEventListener("fileload", function (evt) { handleFileLoadApanEn(evt, comp) });
 		loader.addEventListener("complete", function (evt) { handleCompleteApanEn(evt, comp) });
@@ -369,7 +388,7 @@ function handleCompleteCDMX(evt,comp) {
 		dom_overlay_containerCaleraEn = document.getElementById("dom_overlay_containerCaleraEn");
 		var comp = AdobeAnCaleraEn.getComposition("ADB731659DD5194895D90CE1B0911A0BCALERAEN");
 		var lib = comp.getLibrary();
-		var loader = new createjs.LoadQueue(false);
+		var loader = new createjs.LoadQueue(false, '', true);
 		loader.installPlugin(createjs.Sound);
 		loader.addEventListener("fileload", function (evt) { handleFileLoadCaleraEn(evt, comp) });
 		loader.addEventListener("complete", function (evt) { handleCompleteCaleraEn(evt, comp) });
