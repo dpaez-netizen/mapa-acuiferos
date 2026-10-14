@@ -3344,7 +3344,7 @@
 			this.button_2.addEventListener("click", fl_ClickToGoToWebPage_2);
 			
 			function fl_ClickToGoToWebPage_2() {
-				window.open("/es/cdmx", "_self");
+				window.irAAcuifero('cdmx');
 			}
 		}
 	
