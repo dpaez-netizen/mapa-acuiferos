@@ -28,6 +28,25 @@ window.playSound = function (id, loop, offset) {
 };
 
 /* ============================================================
+   RUTAS de los botones "Conoce mas" de las animaciones.
+   Se usan desde los archivos de Animate asi:
+     window.irAAcuifero('calera');   // 'apan' | 'cdmx'
+   Ajusta aqui las URLs reales del sitio (un solo lugar).
+   ============================================================ */
+window.RUTAS_ACUIFEROS = {
+  es: { calera: '/calera',    apan: '/apan',    cdmx: '/cdmx' },
+  en: { calera: '/en/calera', apan: '/en/apan', cdmx: '/cdmx' }
+};
+window.irAAcuifero = function (slug) {
+  var lang = (document.documentElement.lang || 'es').toLowerCase().indexOf('en') === 0 ? 'en' : 'es';
+  var rutas = window.RUTAS_ACUIFEROS;
+  var ruta = (rutas[lang] && rutas[lang][slug]) || rutas.es[slug];
+  if (!ruta) return;
+  if (typeof window.resetCanvases === 'function') window.resetCanvases();
+  window.open(ruta, '_self');
+};
+
+/* ============================================================
    IMPORTANTE: todo lo de aqui abajo (variables canvas/stage/etc.
    y las funciones init, handleFileLoad y handleComplete de cada
    region) vive a nivel GLOBAL (fuera de cualquier funcion), a
@@ -425,10 +444,35 @@ window.addEventListener('load', function () {
     window.stopCanvasApanEn();
   };
 
+  // Destruye por completo los stages de las animaciones del modal (listeners de
+  // mouse, ticker, hijos y sonido) para que cada apertura empiece limpia y no
+  // queden stages viejos activos sobre el mismo canvas.
+  window.resetCanvases = function () {
+    ['CDMX', 'Calera', 'Apan', 'CaleraEn', 'ApanEn'].forEach(function (n) {
+      var st = window['stage' + n];
+      if (st) {
+        try {
+          createjs.Ticker.removeEventListener('tick', st);
+          st.removeAllChildren();
+          st.enableDOMEvents(false);
+          st.removeAllEventListeners();
+        } catch (e) {}
+      }
+      window['stage' + n] = null;
+      window['exportRoot' + n] = null;
+      var cv = document.getElementById('canvas' + n);
+      if (cv && cv.getContext) {
+        try { cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); } catch (e) {}
+      }
+    });
+    createjs.Sound.stop();
+  };
+
   window.showLightBox = function (aquifer) {
     var refLightBox = document.getElementById('lightbox');
     var refLightBoxContent = document.getElementById('container-stories');
     var lang = (document.documentElement.lang || 'es').toLowerCase().indexOf('en') === 0 ? 'en' : 'es';
+    window.resetCanvases();
     hideTarget("#storyboard-calera");
     hideTarget("#storyboard-apan");
     hideTarget("#storyboard-cdmx");
@@ -497,7 +541,7 @@ window.addEventListener('load', function () {
     var refLightBoxClose = refLightBox.querySelector('[data-modal-close]');
     refLightBoxClose.addEventListener('click', function () {
       refLightBox.classList.add('hide');
-      window.stopAllCanvases();
+      window.resetCanvases();
     });
   }
 
